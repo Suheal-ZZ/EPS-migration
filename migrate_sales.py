@@ -6,7 +6,7 @@ Company  : Venkateshwara Traders
 Source   : output/voucher_sales_YYYYMMDD_YYYYMMDD.json  (12 files, 1,884 invoices)
 Target   : ERPNext Sales Invoice (submitted)
 
-What this script does:
+What this job does:
   1. Reads all 12 monthly sales voucher JSON files
   2. For each voucher: maps date, customer, items, GST/charges
   3. Creates and submits Sales Invoice in ERPNext

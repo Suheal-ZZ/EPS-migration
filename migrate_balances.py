@@ -335,7 +335,7 @@ def patch_account_type(account_name):
     These types require a party on every journal line — unusable for loan/provision accounts.
     Patches them to account_type='' (blank) so they work without a party.
 
-    This handles accounts wrongly created in earlier script runs.
+    This handles accounts wrongly created in earlier job runs.
     """
     # First fetch current account_type
     r = requests.get(

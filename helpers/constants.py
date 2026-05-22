@@ -74,7 +74,7 @@ SKIP_PL_GROUPS = [
 #
 # parent candidates:
 #   List of possible ERPNext parent account base names in priority order.
-#   The script tries each with and without the company suffix until one exists.
+#   The job tries each with and without the company suffix until one exists.
 #   This handles ERPNext India CoA name variations across versions.
 # ─────────────────────────────────────────────────────────────────────────────
 GROUP_MAP = {

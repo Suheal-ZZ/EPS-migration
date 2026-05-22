@@ -409,7 +409,7 @@ def reset():
             print()
             print("  Some records could not be deleted.")
             print("  They may still be linked to other documents.")
-            print("  Re-run this script — it is safe to run multiple times.")
+            print("  Re-run this job — it is safe to run multiple times.")
 
 
 if __name__ == "__main__":
