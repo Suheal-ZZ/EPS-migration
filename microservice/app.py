@@ -39,9 +39,9 @@ def create_app() -> Flask:
         except UnknownJobError:
             return jsonify({"error": "Unknown job"}), 404
         except InvalidJobRequestError:
-            return jsonify({"error": "Invalid job execution request"}), 400
+            return jsonify({"error": "timeout_seconds must be positive"}), 400
         except JobScriptNotFoundError:
-            return jsonify({"error": "Job script not found"}), 404
+            return jsonify({"error": f"Job script not found for job '{job_name}'"}), 404
         except JobTimeoutError:
             return jsonify({"error": "Job execution timeout exceeded"}), 504
         except Exception as exc:  # pragma: no cover
