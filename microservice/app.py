@@ -34,10 +34,10 @@ def create_app() -> Flask:
             result = run_job(job_name=job_name, options=options, timeout_seconds=timeout)
         except ValueError as exc:
             if "Unknown job:" in str(exc):
-                return jsonify({"error": str(exc)}), 404
-            return jsonify({"error": str(exc)}), 400
-        except FileNotFoundError as exc:
-            return jsonify({"error": str(exc)}), 404
+                return jsonify({"error": "Unknown job"}), 404
+            return jsonify({"error": "Invalid job execution request"}), 400
+        except FileNotFoundError:
+            return jsonify({"error": "Job script not found"}), 404
         except Exception as exc:  # pragma: no cover
             app.logger.exception("Unexpected job execution failure: %s", exc)
             return jsonify({"error": "Internal server error"}), 500

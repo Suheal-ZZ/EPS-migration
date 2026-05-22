@@ -11,10 +11,12 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 def list_jobs() -> list[str]:
+    """Return all supported migration/validation job names."""
     return sorted(SCRIPT_REGISTRY.keys())
 
 
 def _build_cli_args(raw_options: dict) -> list[str]:
+    """Convert a validated options dictionary into whitelisted CLI arguments."""
     cli_args: list[str] = []
     for key, value in raw_options.items():
         expected_type = ALLOWED_ARGS.get(key)
@@ -35,6 +37,7 @@ def _build_cli_args(raw_options: dict) -> list[str]:
 
 
 def run_job(job_name: str, options: dict | None = None, timeout_seconds: int = 1200) -> dict:
+    """Execute a registered migration script and return command output metadata."""
     if job_name not in SCRIPT_REGISTRY:
         raise ValueError(f"Unknown job: {job_name}")
     if timeout_seconds <= 0:

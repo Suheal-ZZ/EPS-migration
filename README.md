@@ -16,6 +16,9 @@ pip install -r requirements.txt
 python3 app.py
 ```
 
+By default the service binds to `127.0.0.1:5000`.  
+Set `FLASK_HOST=0.0.0.0` if you want network-accessible binding.
+
 ## API
 
 - `GET /health` → service health check
