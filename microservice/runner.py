@@ -10,6 +10,18 @@ from .script_registry import ALLOWED_ARGS, SCRIPT_REGISTRY
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
+class UnknownJobError(ValueError):
+    """Raised when a requested job is not registered."""
+
+
+class InvalidJobRequestError(ValueError):
+    """Raised when request options are invalid for safe execution."""
+
+
+class JobScriptNotFoundError(FileNotFoundError):
+    """Raised when a mapped script file cannot be found."""
+
+
 def list_jobs() -> list[str]:
     """Return all supported migration/validation job names."""
     return sorted(SCRIPT_REGISTRY.keys())
@@ -39,13 +51,13 @@ def _build_cli_args(raw_options: dict) -> list[str]:
 def run_job(job_name: str, options: dict | None = None, timeout_seconds: int = 1200) -> dict:
     """Execute a registered migration script and return command output metadata."""
     if job_name not in SCRIPT_REGISTRY:
-        raise ValueError(f"Unknown job: {job_name}")
+        raise UnknownJobError(job_name)
     if timeout_seconds <= 0:
-        raise ValueError("timeout_seconds must be a positive integer")
+        raise InvalidJobRequestError("timeout_seconds must be a positive integer")
 
     script_path = REPO_ROOT / SCRIPT_REGISTRY[job_name]
     if not script_path.exists():
-        raise FileNotFoundError(f"Script not found: {script_path}")
+        raise JobScriptNotFoundError(str(script_path))
 
     safe_options = options or {}
     command = [sys.executable, str(script_path), *_build_cli_args(safe_options)]
@@ -63,7 +75,6 @@ def run_job(job_name: str, options: dict | None = None, timeout_seconds: int = 1
 
     return {
         "job": job_name,
-        "command": command,
         "exit_code": process.returncode,
         "stdout": process.stdout,
         "stderr": process.stderr,

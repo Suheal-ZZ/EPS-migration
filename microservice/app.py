@@ -2,7 +2,13 @@ from __future__ import annotations
 
 from flask import Flask, jsonify, request
 
-from .runner import list_jobs, run_job
+from .runner import (
+    InvalidJobRequestError,
+    JobScriptNotFoundError,
+    UnknownJobError,
+    list_jobs,
+    run_job,
+)
 
 
 def create_app() -> Flask:
@@ -32,11 +38,11 @@ def create_app() -> Flask:
 
         try:
             result = run_job(job_name=job_name, options=options, timeout_seconds=timeout)
-        except ValueError as exc:
-            if "Unknown job:" in str(exc):
-                return jsonify({"error": "Unknown job"}), 404
-            return jsonify({"error": "Invalid job execution request"}), 400
-        except FileNotFoundError:
+        except UnknownJobError:
+            return jsonify({"error": "Unknown job"}), 404
+        except InvalidJobRequestError as exc:
+            return jsonify({"error": str(exc)}), 400
+        except JobScriptNotFoundError:
             return jsonify({"error": "Job script not found"}), 404
         except Exception as exc:  # pragma: no cover
             app.logger.exception("Unexpected job execution failure: %s", exc)
