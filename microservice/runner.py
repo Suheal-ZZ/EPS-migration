@@ -37,6 +37,8 @@ def _build_cli_args(raw_options: dict) -> list[str]:
 def run_job(job_name: str, options: dict | None = None, timeout_seconds: int = 1200) -> dict:
     if job_name not in SCRIPT_REGISTRY:
         raise ValueError(f"Unknown job: {job_name}")
+    if timeout_seconds <= 0:
+        raise ValueError("timeout_seconds must be a positive integer")
 
     script_path = REPO_ROOT / SCRIPT_REGISTRY[job_name]
     if not script_path.exists():

@@ -20,16 +20,27 @@ def create_app() -> Flask:
     def run(job_name: str):
         payload = request.get_json(silent=True) or {}
         options = payload.get("options", {})
-        timeout = int(payload.get("timeout_seconds", 1200))
+        timeout_raw = payload.get("timeout_seconds", 1200)
+
+        try:
+            timeout = int(timeout_raw)
+        except (TypeError, ValueError):
+            return jsonify({"error": "timeout_seconds must be a positive integer"}), 400
+
+        if timeout <= 0:
+            return jsonify({"error": "timeout_seconds must be a positive integer"}), 400
 
         try:
             result = run_job(job_name=job_name, options=options, timeout_seconds=timeout)
         except ValueError as exc:
-            return jsonify({"error": str(exc)}), 404
+            if "Unknown job:" in str(exc):
+                return jsonify({"error": str(exc)}), 404
+            return jsonify({"error": str(exc)}), 400
         except FileNotFoundError as exc:
             return jsonify({"error": str(exc)}), 404
         except Exception as exc:  # pragma: no cover
-            return jsonify({"error": str(exc)}), 500
+            app.logger.exception("Unexpected job execution failure: %s", exc)
+            return jsonify({"error": "Internal server error"}), 500
 
         status_code = 200 if result["success"] else 500
         return jsonify(result), status_code
