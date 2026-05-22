@@ -22,6 +22,10 @@ class JobScriptNotFoundError(FileNotFoundError):
     """Raised when a mapped script file cannot be found."""
 
 
+class JobTimeoutError(TimeoutError):
+    """Raised when a job execution exceeds the configured timeout."""
+
+
 def list_jobs() -> list[str]:
     """Return all supported migration/validation job names."""
     return sorted(SCRIPT_REGISTRY.keys())
@@ -64,6 +68,7 @@ def run_job(job_name: str, options: dict | None = None, timeout_seconds: int = 1
         UnknownJobError: If the requested job name is not registered.
         InvalidJobRequestError: If timeout_seconds is not positive.
         JobScriptNotFoundError: If the mapped script file is missing.
+        JobTimeoutError: If the subprocess exceeds timeout_seconds.
     """
     if job_name not in SCRIPT_REGISTRY:
         raise UnknownJobError(job_name)
@@ -78,15 +83,18 @@ def run_job(job_name: str, options: dict | None = None, timeout_seconds: int = 1
     command = [sys.executable, str(script_path), *_build_cli_args(safe_options)]
 
     env = os.environ.copy()
-    process = subprocess.run(
-        command,
-        cwd=str(REPO_ROOT),
-        env=env,
-        capture_output=True,
-        text=True,
-        timeout=timeout_seconds,
-        check=False,
-    )
+    try:
+        process = subprocess.run(
+            command,
+            cwd=str(REPO_ROOT),
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=timeout_seconds,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise JobTimeoutError("Job execution timeout exceeded") from exc
 
     return {
         "job": job_name,

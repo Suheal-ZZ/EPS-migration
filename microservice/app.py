@@ -5,6 +5,7 @@ from flask import Flask, jsonify, request
 from .runner import (
     InvalidJobRequestError,
     JobScriptNotFoundError,
+    JobTimeoutError,
     UnknownJobError,
     list_jobs,
     run_job,
@@ -37,10 +38,12 @@ def create_app() -> Flask:
             result = run_job(job_name=job_name, options=options, timeout_seconds=timeout)
         except UnknownJobError:
             return jsonify({"error": "Unknown job"}), 404
-        except InvalidJobRequestError as exc:
-            return jsonify({"error": str(exc)}), 400
+        except InvalidJobRequestError:
+            return jsonify({"error": "Invalid job execution request"}), 400
         except JobScriptNotFoundError:
             return jsonify({"error": "Job script not found"}), 404
+        except JobTimeoutError:
+            return jsonify({"error": "Job execution timeout exceeded"}), 504
         except Exception as exc:  # pragma: no cover
             app.logger.exception("Unexpected job execution failure: %s", exc)
             return jsonify({"error": "Internal server error"}), 500
