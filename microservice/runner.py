@@ -53,7 +53,7 @@ def run_job(job_name: str, options: dict | None = None, timeout_seconds: int = 1
     if job_name not in SCRIPT_REGISTRY:
         raise UnknownJobError(job_name)
     if timeout_seconds <= 0:
-        raise InvalidJobRequestError("timeout_seconds must be a positive integer")
+        raise InvalidJobRequestError("timeout_seconds must be positive")
 
     script_path = REPO_ROOT / SCRIPT_REGISTRY[job_name]
     if not script_path.exists():
