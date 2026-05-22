@@ -49,7 +49,22 @@ def _build_cli_args(raw_options: dict) -> list[str]:
 
 
 def run_job(job_name: str, options: dict | None = None, timeout_seconds: int = 1200) -> dict:
-    """Execute a registered migration script and return command output metadata."""
+    """
+    Execute a registered migration/validation script in a subprocess.
+
+    Args:
+        job_name: Registry key from SCRIPT_REGISTRY.
+        options: Optional dictionary of allowed CLI options.
+        timeout_seconds: Subprocess timeout in seconds; must be positive.
+
+    Returns:
+        A dictionary with job name, exit code, stdout, stderr and success flag.
+
+    Raises:
+        UnknownJobError: If the requested job name is not registered.
+        InvalidJobRequestError: If timeout_seconds is not positive.
+        JobScriptNotFoundError: If the mapped script file is missing.
+    """
     if job_name not in SCRIPT_REGISTRY:
         raise UnknownJobError(job_name)
     if timeout_seconds <= 0:
